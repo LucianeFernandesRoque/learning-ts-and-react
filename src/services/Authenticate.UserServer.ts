@@ -1,8 +1,0 @@
-class AuthenticateUserService {
-
-
-
-
-}
-
-export { AuthenticateUserService }
