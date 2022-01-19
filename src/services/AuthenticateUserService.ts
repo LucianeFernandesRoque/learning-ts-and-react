@@ -1,30 +1,31 @@
-import axios from "axios";
-/**Recebe o codigo via string
- * precisa recuperar o access token no github
- * Verifica se usuarion existe no banco de dados
- * se exixtir gera um token
- * senão cria no banco de dados gera um token
- * retornar o token com as infos do usuario logado
- */
 
+
+interface IAccessTokenResponse {
+  access_token: string
+}
+
+import axios from "axios";
 class AuthenticateUserService {
   async execute(code: string) {
-    const url = "https://github.com/login/oauth/access_token";
+    const url = "http://github.com/login/oauth/access_token";
 
-    const response = await axios.post(url,null, {
+    const { data: accessTokenResponse } = await axios.post<IAccessTokenResponse>(url, null, {
       params: {
         client_id: process.env.GITHUB_CLIENT_ID,
         client_secret: process.env.GITHUB_CLIENT_SECRET,
         code,
-
       },
       headers: {
-        "Accept": "apllication/json"
-      }
-  })
+        Accept: "application/json",
+      },
+    });
 
-
-  return  response.data;
+    const response = await axios.get("https://api.github.com/user", {
+      headers: {
+      authorization: `Bearer ${accessTokenResponse.access_token}`,
+      },
+    });
+      return response.data;
   }
 }
 
